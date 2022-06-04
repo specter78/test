@@ -1,0 +1,38 @@
+name: CI_S
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+          ruby-version: '3.1'
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        retain_days: 0
+        keep_minimum_runs: 1
+        
+    - name: Run
+      env: 
+        TOKEN: ${{ secrets.TOKEN_S }}
+        FILE: ${{ secrets.FILE_S }}
+        INPUT: ${{ secrets.INPUT_S }}
+        INDEX: ${{ secrets.INDEX_S }}
+        OUTPUT: ${{ secrets.OUTPUT_S }}
+      run: |
+        gem install gist watir headless webdrivers
+        echo $TOKEN >> ~/.gist
+        gist -r $FILE > run.rb
+        gist -r $INPUT > input.txt
+        gist -r $INDEX > index_s.txt
+        gist -r $OUTPUT > output_s.txt
+        ruby run.rb
